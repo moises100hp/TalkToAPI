@@ -113,6 +113,49 @@ namespace TalkToAPI.V1.Controllers
                 return UnprocessableEntity(ModelState);
         }
 
+        //api/usuario/{id} - PUT
+
+        [HttpPost("{id}")]
+        public ActionResult Atualizar(string id, [FromBody] UsuarioDTO usuarioDTO)
+        {
+            //TODO - Adicionar Filtro de validação
+            if (_userManager.GetUserAsync(HttpContext.User).Result.Id != id)
+                return Forbid();
+
+            if (ModelState.IsValid)
+            {
+                //TODO - Refatorar para AutoMapper
+                AplicationUser usuario = new AplicationUser();
+
+                usuario.FullName = usuarioDTO.Nome;
+                usuario.UserName = usuarioDTO.Email;
+                usuario.Email = usuarioDTO.Email;
+                usuario.Slogan = usuario.Slogan;
+
+                //TODO - Remover no Identity critérios da senha
+                var resultado = _userManager.UpdateAsync(usuario).Result;
+                _userManager.RemovePasswordAsync(usuario);
+                _userManager.AddPasswordAsync(usuario, usuarioDTO.Senha);
+
+                if (!resultado.Succeeded)
+                {
+                    List<string> erros = new List<string>();
+
+                    foreach (var erro in resultado.Errors)
+                    {
+                        erros.Add(erro.Description);
+                    }
+                    return UnprocessableEntity(erros);
+                }
+                else
+                    return Ok(usuario);
+            }
+            else
+                return UnprocessableEntity(ModelState);
+        }
+
+
+
         private TokenDTO BuildToken(AplicationUser usuario)
         {
             var claims = new[]
