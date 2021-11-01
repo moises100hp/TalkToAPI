@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -20,6 +21,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using TalkToAPI.Database;
+using TalkToAPI.Helpers;
 using TalkToAPI.Helpers.Swagger;
 using TalkToAPI.V1.Models;
 using TalkToAPI.V1.Repositories;
@@ -39,6 +41,17 @@ namespace TalkToAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            #region Auto Mapper - Configuração
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(new DTOMapperProfile());
+            });
+            IMapper mapper = config.CreateMapper();
+            services.AddSingleton(mapper);
+
+            #endregion
+
+
             services.Configure<ApiBehaviorOptions>(op =>
             {
                 op.SuppressModelStateInvalidFilter = true;
@@ -49,10 +62,10 @@ namespace TalkToAPI
             {
                 cfg.UseSqlite("Data Source=Database\\TalkTo.db");
             });
-            services.AddMvc(config => {
-                config.ReturnHttpNotAcceptable = true;
-                config.InputFormatters.Add(new XmlSerializerInputFormatter(config));
-                config.OutputFormatters.Add(new XmlSerializerOutputFormatter());
+            services.AddMvc(cfg => {
+                cfg.ReturnHttpNotAcceptable = true;
+                cfg.InputFormatters.Add(new XmlSerializerInputFormatter(cfg));
+                cfg.OutputFormatters.Add(new XmlSerializerOutputFormatter());
             })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddJsonOptions(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
