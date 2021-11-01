@@ -12,6 +12,7 @@ using System.Security.Claims;
 using System.Text;
 using TalkToAPI.V1.Repositories.Contracts;
 using TalkToAPI.V1.Models.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TalkToAPI.V1.Controllers
 {
@@ -115,17 +116,21 @@ namespace TalkToAPI.V1.Controllers
 
         //api/usuario/{id} - PUT
 
-        [HttpPost("{id}")]
+        [Authorize]
+        [HttpPut("{id}")]
         public ActionResult Atualizar(string id, [FromBody] UsuarioDTO usuarioDTO)
         {
+            AplicationUser usuario = _userManager.GetUserAsync(HttpContext.User).Result;
+
             //TODO - Adicionar Filtro de validação
-            if (_userManager.GetUserAsync(HttpContext.User).Result.Id != id)
+            if (usuario.Id != id)
+            {
                 return Forbid();
+            }
 
             if (ModelState.IsValid)
             {
                 //TODO - Refatorar para AutoMapper
-                AplicationUser usuario = new AplicationUser();
 
                 usuario.FullName = usuarioDTO.Nome;
                 usuario.UserName = usuarioDTO.Email;
