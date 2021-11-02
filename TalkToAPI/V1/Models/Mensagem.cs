@@ -11,12 +11,20 @@ namespace TalkToAPI.V1.Models
     {
         [Key]
         public int Id { get; set; }
+
         [ForeignKey("DeId")]
         public AplicationUser De { get; set; }
+
+        [Required]
         public string DeId { get; set; }
+
         [ForeignKey("ParaId")]
         public AplicationUser Para { get; set; }
+
+        [Required]
         public string ParaId { get; set; }
+
+        [Required]
         public string Texto { get; set; }
         public DateTime Criado { get; set; }
     }

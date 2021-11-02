@@ -56,7 +56,8 @@ namespace TalkToAPI
             {
                 op.SuppressModelStateInvalidFilter = true;
             });
-            services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+            services.AddScoped<IMensagemRepository, MensagemRepository>();
+            services.AddScoped<ITokenRepository, TokenRepository>();
             services.AddScoped<ITokenRepository, TokenRepository>();
             services.AddDbContext<TalkToContext>(cfg =>
             {
