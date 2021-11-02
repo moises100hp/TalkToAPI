@@ -34,6 +34,25 @@ namespace TalkToAPI.V1.Controllers
             _userManager = userManager;
         }
 
+        [Authorize]
+        [HttpGet("")]
+        public ActionResult ObterTodos()
+        {
+            return Ok(_userManager.Users);
+        }
+
+        [HttpGet("{id}")]
+        public ActionResult ObterUsuario(string id)
+        {
+            var usuario = _userManager.FindByIdAsync(id).Result;
+
+            if (usuario == null)
+                return NotFound();
+            else
+            return Ok(usuario);
+        }
+
+
         [HttpPost("login")]
         public ActionResult Login([FromBody] UsuarioDTO usuarioDTO)
         {
@@ -113,8 +132,6 @@ namespace TalkToAPI.V1.Controllers
             else
                 return UnprocessableEntity(ModelState);
         }
-
-        //api/usuario/{id} - PUT
 
         [Authorize]
         [HttpPut("{id}")]
