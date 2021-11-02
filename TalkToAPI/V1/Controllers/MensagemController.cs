@@ -9,7 +9,7 @@ using TalkToAPI.V1.Repositories.Contracts;
 
 namespace TalkToAPI.V1.Controllers
 {
-    [Route("api/[controller")]
+    [Route("api/[controller]")]
     [ApiController]
     [ApiVersion("1.0")]
 
@@ -22,7 +22,7 @@ namespace TalkToAPI.V1.Controllers
         }
 
         [Authorize]
-        [HttpGet("{usuarioUmId}/{usuarioDoisId}")]
+        [HttpGet("{usuarioumid}/{usuariodoisid}")]
         public ActionResult Obter(string usuarioumid, string usuariodoisid)
         {
             if (usuarioumid == usuariodoisid)
@@ -34,7 +34,7 @@ namespace TalkToAPI.V1.Controllers
 
         [Authorize]
         [HttpPost("")]
-        public ActionResult Cadastrar([FromBody]Mensagem mensagem)
+        public ActionResult Cadastrar([FromBody] Mensagem mensagem)
         {
             if (ModelState.IsValid)
             {
@@ -53,8 +53,6 @@ namespace TalkToAPI.V1.Controllers
             {
                 return UnprocessableEntity(ModelState);
             }
-
-            return Ok();
         }
     }
 }

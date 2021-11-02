@@ -18,9 +18,9 @@ namespace TalkToAPI.V1.Repositories
         }
 
 
-        public List<Mensagem> ObterMensagem(string usuarioUmId, string usuarioDoisId)
+        public List<Mensagem> ObterMensagem(string usuarioumid, string usuariodoisid)
         {
-            return _banco.Mensagem.Where(a => (a.DeId == usuarioUmId || a.DeId == usuarioDoisId) && (a.ParaId == usuarioUmId || a.ParaId == usuarioDoisId)).ToList();
+            return _banco.Mensagem.Where(a => (a.DeId == usuarioumid || a.DeId == usuariodoisid) && (a.ParaId == usuarioumid || a.ParaId == usuariodoisid)).ToList();
         }
 
         public void Cadastrar(Mensagem mensagem)

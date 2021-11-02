@@ -175,9 +175,7 @@ namespace TalkToAPI.V1.Controllers
             else
                 return UnprocessableEntity(ModelState);
         }
-
-
-
+        
         private TokenDTO BuildToken(AplicationUser usuario)
         {
             var claims = new[]

@@ -42,9 +42,9 @@ namespace TalkToAPI
         public void ConfigureServices(IServiceCollection services)
         {
             #region Auto Mapper - Configuração
-            var config = new MapperConfiguration(cfg =>
+            var config = new MapperConfiguration(configu =>
             {
-                cfg.AddProfile(new DTOMapperProfile());
+                configu.AddProfile(new DTOMapperProfile());
             });
             IMapper mapper = config.CreateMapper();
             services.AddSingleton(mapper);
@@ -57,7 +57,7 @@ namespace TalkToAPI
                 op.SuppressModelStateInvalidFilter = true;
             });
             services.AddScoped<IMensagemRepository, MensagemRepository>();
-            services.AddScoped<ITokenRepository, TokenRepository>();
+            services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             services.AddScoped<ITokenRepository, TokenRepository>();
             services.AddDbContext<TalkToContext>(cfg =>
             {
@@ -74,6 +74,7 @@ namespace TalkToAPI
 
             services.AddApiVersioning(cfg =>
             {
+                cfg.ReportApiVersions = true;
                 cfg.AssumeDefaultVersionWhenUnspecified = true;
                 cfg.DefaultApiVersion = new ApiVersion(1, 0);
             });
