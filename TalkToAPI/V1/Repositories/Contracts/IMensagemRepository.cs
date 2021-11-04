@@ -8,9 +8,12 @@ namespace TalkToAPI.V1.Repositories.Contracts
 {
     public interface IMensagemRepository
     {
-        List<Mensagem> ObterMensagem(string usuarioUmId, string usuarioDoisId);
+        Mensagem Obter(int id);
+        List<Mensagem> ObterMensagens(string usuarioUmId, string usuarioDoisId);
 
         void Cadastrar(Mensagem mensagem);
+
+        void Atualizar(Mensagem mensagem);
         
     }
 }

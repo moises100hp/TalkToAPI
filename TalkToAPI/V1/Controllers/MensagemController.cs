@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace TalkToAPI.V1.Controllers
             {
                 return UnprocessableEntity();
             }
-            return Ok(_mensagemRepository.ObterMensagem(usuarioumid, usuariodoisid));
+            return Ok(_mensagemRepository.ObterMensagens(usuarioumid, usuariodoisid));
         }
 
         [Authorize]
@@ -53,6 +54,27 @@ namespace TalkToAPI.V1.Controllers
             {
                 return UnprocessableEntity(ModelState);
             }
+        }
+
+        [Authorize]
+        [HttpPatch("{id}")]
+        public ActionResult AtualizacaoParcial(int id, [FromBody] JsonPatchDocument<Mensagem> jsonPatch)
+        {
+            /*
+                JSONPath - { "op": "add|remove|replace", "path": "texto", "value": "Substituido" }
+             */
+
+            if (jsonPatch == null)
+                return BadRequest();
+
+            var mensagem = _mensagemRepository.Obter(id);
+
+            jsonPatch.ApplyTo(mensagem);
+            mensagem.Atualizado = DateTime.UtcNow;
+
+            _mensagemRepository.Atualizar(mensagem);
+
+            return Ok(mensagem);
         }
     }
 }
