@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TalkToAPI.V1.Models.DTO;
 
 namespace TalkToAPI.Helpers
 {
@@ -11,7 +12,9 @@ namespace TalkToAPI.Helpers
     {
         public DTOMapperProfile()
         {
-           // CreateMap<Palavra, PalavraDTO>();
+            CreateMap<AplicationUser, UsuarioDTO>()
+                .ForMember(dest=> dest.Nome, orig=> orig.MapFrom(src=> src.FullName));
+
             //CreateMap<PaginationList<Palavra>, PaginationList<PalavraDTO>>();
         }
     }
