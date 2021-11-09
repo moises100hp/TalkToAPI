@@ -38,7 +38,7 @@ namespace TalkToAPI.V1.Controllers
         }
 
         [Authorize]
-        [HttpGet("")]
+        [HttpGet("", Name = "UsuarioObterTodos")]
         public ActionResult ObterTodos()
         {
             var usuarioAppUser = _userManager.Users.ToList();
@@ -47,13 +47,16 @@ namespace TalkToAPI.V1.Controllers
 
             foreach (var usuarioDTO in listaUsuarioDTO)
             {
-                usuarioDTO.Links.Add(new LinkDTO("_self", Url.Link("ObterUsuario", new { id = usuarioDTO.Id }), "GET"));
+                usuarioDTO.Links.Add(new LinkDTO("_self", Url.Link("UsuarioObter", new { id = usuarioDTO.Id }), "GET"));
             }
 
-            return Ok(listaUsuarioDTO);
+            var lista = new ListaDTO<UsuarioDTO>() { Lista = listaUsuarioDTO };
+            lista.Links.Add(new LinkDTO("_self", Url.Link("UsuarioObterTodos", null), "GET"));
+
+            return Ok(lista);
         }
 
-        [HttpGet("{id}", Name = "ObterUsuario")]
+        [HttpGet("{id}", Name = "UsuarioObter")]
         public ActionResult ObterUsuario(string id)
         {
             var usuario = _userManager.FindByIdAsync(id).Result;
@@ -63,12 +66,97 @@ namespace TalkToAPI.V1.Controllers
 
 
             var usuarioDTOdb = _mapper.Map<AplicationUser, UsuarioDTO>(usuario);
-            usuarioDTOdb.Links.Add(new LinkDTO("_self", Url.Link("ObterUsuario", new { id = usuario.Id }), "GET"));
-            usuarioDTOdb.Links.Add(new LinkDTO("_atualizar", Url.Link("Atualizar", new { id = usuario.Id }), "PUT"));
+            usuarioDTOdb.Links.Add(new LinkDTO("_self", Url.Link("UsuarioObter", new { id = usuario.Id }), "GET"));
+            usuarioDTOdb.Links.Add(new LinkDTO("_atualizar", Url.Link("UsuarioAtualizar", new { id = usuario.Id }), "PUT"));
 
             return Ok(usuarioDTOdb);
         }
 
+        [HttpPost("", Name = "UsuarioCadastrar")]
+        public ActionResult Cadastrar([FromBody] UsuarioDTO usuarioDTO)
+        {
+            if (ModelState.IsValid)
+            {
+                AplicationUser usuario = new AplicationUser();
+
+                usuario.FullName = usuarioDTO.Nome;
+                usuario.UserName = usuarioDTO.Email;
+                usuario.Email = usuarioDTO.Email;
+
+                var resultado = _userManager.CreateAsync(usuario, usuarioDTO.Senha).Result;
+
+                if (!resultado.Succeeded)
+                {
+                    List<string> erros = new List<string>();
+
+                    foreach (var erro in resultado.Errors)
+                    {
+                        erros.Add(erro.Description);
+                    }
+                    return UnprocessableEntity(erros);
+                }
+                else
+                {
+                    var usuarioDTOdb = _mapper.Map<AplicationUser, UsuarioDTO>(usuario);
+                    usuarioDTOdb.Links.Add(new LinkDTO("_self", Url.Link("UsuarioCadastrar", new { id = usuario.Id }), "POST"));
+                    usuarioDTOdb.Links.Add(new LinkDTO("_obter", Url.Link("UsuarioObter", new { id = usuario.Id }), "GET"));
+                    usuarioDTOdb.Links.Add(new LinkDTO("_atualizar", Url.Link("UsuarioAtualizar", new { id = usuario.Id }), "PUT"));
+
+                    return Ok(usuarioDTOdb);
+                }
+            }
+            else
+                return UnprocessableEntity(ModelState);
+        }
+
+        [Authorize]
+        [HttpPut("{id}", Name = "UsuarioAtualizar")]
+        public ActionResult Atualizar(string id, [FromBody] UsuarioDTO usuarioDTO)
+        {
+            AplicationUser usuario = _userManager.GetUserAsync(HttpContext.User).Result;
+
+            //TODO - Adicionar Filtro de validação
+            if (usuario.Id != id)
+            {
+                return Forbid();
+            }
+
+            if (ModelState.IsValid)
+            {
+                //TODO - Refatorar para AutoMapper
+
+                usuario.FullName = usuarioDTO.Nome;
+                usuario.UserName = usuarioDTO.Email;
+                usuario.Email = usuarioDTO.Email;
+                usuario.Slogan = usuario.Slogan;
+
+                //TODO - Remover no Identity critérios da senha
+                var resultado = _userManager.UpdateAsync(usuario).Result;
+                _userManager.RemovePasswordAsync(usuario);
+                _userManager.AddPasswordAsync(usuario, usuarioDTO.Senha);
+
+                if (!resultado.Succeeded)
+                {
+                    List<string> erros = new List<string>();
+
+                    foreach (var erro in resultado.Errors)
+                    {
+                        erros.Add(erro.Description);
+                    }
+                    return UnprocessableEntity(erros);
+                }
+                else
+                {
+                    var usuarioDTOdb = _mapper.Map<AplicationUser, UsuarioDTO>(usuario);
+                    usuarioDTOdb.Links.Add(new LinkDTO("_self", Url.Link("UsuarioAtualizar", new { id = usuario.Id }), "PUT"));
+                    usuarioDTOdb.Links.Add(new LinkDTO("_obter", Url.Link("UsuarioObter", new { id = usuario.Id }), "GET"));
+
+                    return Ok(usuarioDTOdb);
+                }
+            }
+            else
+                return UnprocessableEntity(ModelState);
+        }
 
         [HttpPost("login")]
         public ActionResult Login([FromBody] UsuarioDTO usuarioDTO)
@@ -120,92 +208,7 @@ namespace TalkToAPI.V1.Controllers
             return GerarToken(usuario);
         }
 
-        [HttpPost("", Name = "Cadastrar")]
-        public ActionResult Cadastrar([FromBody] UsuarioDTO usuarioDTO)
-        {
-            if (ModelState.IsValid)
-            {
-                AplicationUser usuario = new AplicationUser();
 
-                usuario.FullName = usuarioDTO.Nome;
-                usuario.UserName = usuarioDTO.Email;
-                usuario.Email = usuarioDTO.Email;
-
-                var resultado = _userManager.CreateAsync(usuario, usuarioDTO.Senha).Result;
-
-                if (!resultado.Succeeded)
-                {
-                    List<string> erros = new List<string>();
-
-                    foreach (var erro in resultado.Errors)
-                    {
-                        erros.Add(erro.Description);
-                    }
-                    return UnprocessableEntity(erros);
-                }
-                else
-                {
-                    var usuarioDTOdb = _mapper.Map<AplicationUser, UsuarioDTO>(usuario);
-                    usuarioDTOdb.Links.Add(new LinkDTO("_self", Url.Link("Cadastrar", new { id = usuario.Id }), "POST"));
-                    usuarioDTOdb.Links.Add(new LinkDTO("_obter", Url.Link("ObterUsuario", new { id = usuario.Id }), "GET"));
-                    usuarioDTOdb.Links.Add(new LinkDTO("_atualizar", Url.Link("Atualizar", new { id = usuario.Id }), "PUT"));
-
-                    return Ok(usuarioDTOdb);
-                }
-            }
-            else
-                return UnprocessableEntity(ModelState);
-        }
-
-        [Authorize]
-        [HttpPut("{id}", Name = "Atualizar")]
-        public ActionResult Atualizar(string id, [FromBody] UsuarioDTO usuarioDTO)
-        {
-            AplicationUser usuario = _userManager.GetUserAsync(HttpContext.User).Result;
-
-            //TODO - Adicionar Filtro de validação
-            if (usuario.Id != id)
-            {
-                return Forbid();
-            }
-
-            if (ModelState.IsValid)
-            {
-                //TODO - Refatorar para AutoMapper
-
-                usuario.FullName = usuarioDTO.Nome;
-                usuario.UserName = usuarioDTO.Email;
-                usuario.Email = usuarioDTO.Email;
-                usuario.Slogan = usuario.Slogan;
-
-                //TODO - Remover no Identity critérios da senha
-                var resultado = _userManager.UpdateAsync(usuario).Result;
-                _userManager.RemovePasswordAsync(usuario);
-                _userManager.AddPasswordAsync(usuario, usuarioDTO.Senha);
-
-                if (!resultado.Succeeded)
-                {
-                    List<string> erros = new List<string>();
-
-                    foreach (var erro in resultado.Errors)
-                    {
-                        erros.Add(erro.Description);
-                    }
-                    return UnprocessableEntity(erros);
-                }
-                else
-                {
-                    var usuarioDTOdb = _mapper.Map<AplicationUser, UsuarioDTO>(usuario);
-                    usuarioDTOdb.Links.Add(new LinkDTO("_self", Url.Link("Atualizar", new { id = usuario.Id }), "PUT"));
-                    usuarioDTOdb.Links.Add(new LinkDTO("_obter", Url.Link("ObterUsuario", new { id = usuario.Id }), "GET"));
-
-                    return Ok(usuarioDTOdb);
-                }
-            }
-            else
-                return UnprocessableEntity(ModelState);
-        }
-        
         private TokenDTO BuildToken(AplicationUser usuario)
         {
             var claims = new[]

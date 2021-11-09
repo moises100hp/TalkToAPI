@@ -15,6 +15,8 @@ namespace TalkToAPI.Helpers
             CreateMap<AplicationUser, UsuarioDTO>()
                 .ForMember(dest=> dest.Nome, orig=> orig.MapFrom(src=> src.FullName));
 
+            CreateMap<Mensagem, MensagemDTO>();
+
             //CreateMap<PaginationList<Palavra>, PaginationList<PalavraDTO>>();
         }
     }
