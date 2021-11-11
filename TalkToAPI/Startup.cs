@@ -64,14 +64,33 @@ namespace TalkToAPI
             {
                 cfg.UseSqlite("Data Source=Database\\TalkTo.db");
             });
-            services.AddMvc(cfg => {
+
+            /*
+             Origin: 
+                        Domínio(Sub): api.site.com.br != www.site.com.br != web.site.com.br != www.empresa.com.br
+                        Domínio(Protocolo): http://ww.site.com.br != https://www.site.com.br
+                        Domínio(Porta): http://www.site.com.br:80 != http://www.site.com.br:367
+             */
+
+            services.AddCors(cfg =>
+            {
+                cfg.AddDefaultPolicy(policy =>
+                {
+                    policy
+                    .WithOrigins("https://localhost:7140/", "http://localhost:7140/")
+                    .WithMethods("GET")
+                    .WithHeaders("Accept", "Authorization");
+                });
+            });
+            services.AddMvc(cfg =>
+            {
                 cfg.ReturnHttpNotAcceptable = true;
                 cfg.InputFormatters.Add(new XmlSerializerInputFormatter(cfg));
                 cfg.OutputFormatters.Add(new XmlSerializerOutputFormatter());
 
                 var jsonOutputFormatter = cfg.OutputFormatters.OfType<JsonOutputFormatter>().FirstOrDefault();
 
-                if(jsonOutputFormatter != null)
+                if (jsonOutputFormatter != null)
                 {
                     jsonOutputFormatter.SupportedMediaTypes.Add(CustomMediaType.Heteoas);
                 }
@@ -193,6 +212,7 @@ namespace TalkToAPI
             app.UseStatusCodePages();
             app.UseAuthentication();
             app.UseHttpsRedirection();
+            app.UseCors();
             app.UseMvc();
 
             app.UseSwagger(); // /swagger/v1/swagger.json
