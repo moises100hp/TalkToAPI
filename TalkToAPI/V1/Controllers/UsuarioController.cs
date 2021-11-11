@@ -15,12 +15,14 @@ using TalkToAPI.V1.Models.DTO;
 using Microsoft.AspNetCore.Authorization;
 using AutoMapper;
 using TalkToAPI.Helpers.Constants;
+using Microsoft.AspNetCore.Cors;
 
 namespace TalkToAPI.V1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [ApiVersion("1.0")]
+    [EnableCors("AnyOrigin")] //Habilita cors para politica especifica.
     public class UsuarioController : ControllerBase
     {
         private readonly IMapper _mapper;
@@ -40,6 +42,7 @@ namespace TalkToAPI.V1.Controllers
 
         [Authorize]
         [HttpGet("", Name = "UsuarioObterTodos")]
+        [DisableCors]
         public ActionResult ObterTodos([FromHeader(Name = "Accept")] string mediaType)
         {
             var usuarioAppUser = _userManager.Users.ToList();

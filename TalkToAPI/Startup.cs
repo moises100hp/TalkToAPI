@@ -77,9 +77,22 @@ namespace TalkToAPI
                 cfg.AddDefaultPolicy(policy =>
                 {
                     policy
-                    .WithOrigins("https://localhost:7140/", "http://localhost:7140/")
+                    .WithOrigins("https://localhost:44371", "https://localhost:44371")
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .SetIsOriginAllowedToAllowWildcardSubdomains() //Habilitar CORS para todos os Subdomínios.
                     .WithMethods("GET")
                     .WithHeaders("Accept", "Authorization");
+                });
+
+                //Politica Específica - Habilitar todos os sites, com restrição.
+
+                cfg.AddPolicy("AnyOrigin", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .WithMethods("GET")
+                          .AllowAnyHeader();
+
                 });
             });
             services.AddMvc(cfg =>
@@ -212,7 +225,7 @@ namespace TalkToAPI
             app.UseStatusCodePages();
             app.UseAuthentication();
             app.UseHttpsRedirection();
-            app.UseCors();
+            //app.UseCors(); //Desabilitar quando for usar atributos EnableCors/DisableCors.
             app.UseMvc();
 
             app.UseSwagger(); // /swagger/v1/swagger.json
