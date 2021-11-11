@@ -22,6 +22,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TalkToAPI.Database;
 using TalkToAPI.Helpers;
+using TalkToAPI.Helpers.Constants;
 using TalkToAPI.Helpers.Swagger;
 using TalkToAPI.V1.Models;
 using TalkToAPI.V1.Repositories;
@@ -67,6 +68,13 @@ namespace TalkToAPI
                 cfg.ReturnHttpNotAcceptable = true;
                 cfg.InputFormatters.Add(new XmlSerializerInputFormatter(cfg));
                 cfg.OutputFormatters.Add(new XmlSerializerOutputFormatter());
+
+                var jsonOutputFormatter = cfg.OutputFormatters.OfType<JsonOutputFormatter>().FirstOrDefault();
+
+                if(jsonOutputFormatter != null)
+                {
+                    jsonOutputFormatter.SupportedMediaTypes.Add(CustomMediaType.Heteoas);
+                }
             })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddJsonOptions(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
