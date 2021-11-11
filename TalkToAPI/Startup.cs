@@ -167,7 +167,15 @@ namespace TalkToAPI
 
             });
 
-            services.AddIdentity<AplicationUser, IdentityRole>()
+            //Remove restrições de senha, NÃO recomendado.
+            services.AddIdentity<AplicationUser, IdentityRole>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 5;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+            })
                 .AddEntityFrameworkStores<TalkToContext>()
                 .AddDefaultTokenProviders();
 

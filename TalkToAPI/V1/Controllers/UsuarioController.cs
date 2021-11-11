@@ -65,9 +65,6 @@ namespace TalkToAPI.V1.Controllers
             {
                 var usuarioResult = _mapper.Map<List<AplicationUser>, List<UsuarioDTOSemHyperlink>>(usuarioAppUser);
                 return Ok(usuarioResult);
-
-                //TODO - AutoMapper -> Converter para objeto sem HyperLink.
-                //return Ok(usuarioAppUser);
             }
         }
 
@@ -99,7 +96,7 @@ namespace TalkToAPI.V1.Controllers
         {
             if (ModelState.IsValid)
             {
-                AplicationUser usuario = new AplicationUser();
+                AplicationUser usuario = _mapper.Map<UsuarioDTO, AplicationUser>(usuarioDTO);
 
                 usuario.FullName = usuarioDTO.Nome;
                 usuario.UserName = usuarioDTO.Email;
@@ -145,7 +142,6 @@ namespace TalkToAPI.V1.Controllers
         {
             AplicationUser usuario = _userManager.GetUserAsync(HttpContext.User).Result;
 
-            //TODO - Adicionar Filtro de validação
             if (usuario.Id != id)
             {
                 return Forbid();
@@ -153,14 +149,11 @@ namespace TalkToAPI.V1.Controllers
 
             if (ModelState.IsValid)
             {
-                //TODO - Refatorar para AutoMapper
-
                 usuario.FullName = usuarioDTO.Nome;
                 usuario.UserName = usuarioDTO.Email;
                 usuario.Email = usuarioDTO.Email;
                 usuario.Slogan = usuario.Slogan;
 
-                //TODO - Remover no Identity critérios da senha
                 var resultado = _userManager.UpdateAsync(usuario).Result;
                 _userManager.RemovePasswordAsync(usuario);
                 _userManager.AddPasswordAsync(usuario, usuarioDTO.Senha);
